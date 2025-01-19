@@ -173,5 +173,126 @@ const analytics = getAnalytics(app);
             auth.signOut();
         });
     </script>
+
+    // Reglas de seguridad de Firestore
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Función para verificar rol de usuario
+    function getUserRole(userId) {
+      return get(/databases/$(database)/documents/users/$(userId)).data.role;
+    }
+    
+    // Reglas para la colección de vuelos
+    match /flights/{flightId} {
+      allow read: if request.auth != null; // Todos los usuarios autenticados pueden leer
+      allow create, update, delete: if 
+        getUserRole(request.auth.uid) in ['supervisor', 'coordinador']; // Solo supervisores y coordinadores pueden modificar
+    }
+    
+    // Reglas para la colección de usuarios
+    match /users/{userId} {
+      allow read: if request.auth != null;
+      allow write: if getUserRole(request.auth.uid) == 'supervisor';
+    }
+  }
+}
+
+// Estructura de documento de usuario
+{
+  "uid": "string",
+  "email": "string",
+  "role": "string", // 'supervisor', 'coordinador', o 'agente'
+  "name": "string",
+  "createdAt": "timestamp"
+}
+
+// Estructura de documento de vuelo
+{
+  "arrivalFlight": {
+    "flightNumber": "string",
+    "registration": "string", // matrícula
+    "origin": "string",
+    "estimatedArrival": "timestamp",
+    "platformPosition": "string",
+    "specialServices": [{
+      "type": "string",
+      "quantity": "number"
+    }],
+    "connectingPassengers": [{
+      "connectionFlight": "string",
+      "passengerCount": "number"
+    }]
+  },
+  "departureFlight": {
+    "destination": "string",
+    "departureTime": "timestamp",
+    "businessPassengers": "number",
+    "economyPassengers": "number",
+    "specialServices": [{
+      "type": "string",
+      "quantity": "number"
+    }],
+    "boardingGate": "string",
+    "crewChange": "boolean",
+    "assignedAgents": ["string"] // array de IDs de usuarios
+  },
+  "status": "string",
+  "lastUpdated": "timestamp",
+  "lastUpdatedBy": "string" // ID del usuario que realizó la última actualización
+}
+
+    <script>
+// Función para crear un nuevo usuario en Firestore
+async function createUserWithRole(auth, db, email, password, role) {
+    try {
+        // Crear usuario en Authentication
+        const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+        
+        // Agregar información del rol en Firestore
+        await db.collection('users').doc(userCredential.user.uid).set({
+            email: email,
+            role: role,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            name: email.split('@')[0] // Nombre básico basado en el email
+        });
+        
+        console.log(`Usuario ${role} creado exitosamente`);
+    } catch (error) {
+        console.error("Error creando usuario:", error);
+        throw error;
+    }
+}
+
+// Función para verificar permisos
+function checkUserPermissions(userRole, action) {
+    const permissions = {
+        supervisor: ['create', 'read', 'update', 'delete', 'assign'],
+        coordinador: ['create', 'read', 'update', 'delete', 'assign'],
+        agente: ['read']
+    };
+    
+    return permissions[userRole]?.includes(action) || false;
+}
+
+// Función para obtener el rol del usuario actual
+async function getCurrentUserRole(db, userId) {
+    const userDoc = await db.collection('users').doc(userId).get();
+    return userDoc.data()?.role;
+}
+
+// Ejemplo de uso:
+async function initializeApp() {
+    const userRole = await getCurrentUserRole(db, auth.currentUser.uid);
+    
+    // Mostrar/ocultar botones según permisos
+    const addFlightButton = document.getElementById('newFlightButton');
+    if (checkUserPermissions(userRole, 'create')) {
+        addFlightButton.style.display = 'block';
+    } else {
+        addFlightButton.style.display = 'none';
+    }
+}
+</script>
 </body>
 </html>
