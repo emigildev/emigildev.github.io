@@ -96,7 +96,27 @@
     <script>
         // Tu configuración de Firebase (la obtendrás de la consola de Firebase)
         const firebaseConfig = {
-            // Aquí va tu configuración
+           // Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+const firebaseConfig = {
+  apiKey: "AIzaSyDwHNCzGin0QAQeBZkudOHEVl0UamSbTJ8",
+  authDomain: "gestion-vuelos-aerolinea.firebaseapp.com",
+  projectId: "gestion-vuelos-aerolinea",
+  storageBucket: "gestion-vuelos-aerolinea.firebasestorage.app",
+  messagingSenderId: "320017136873",
+  appId: "1:320017136873:web:bf537495f58a7ca5910478",
+  measurementId: "G-2V1VLYZR9N"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
         };
 
         // Inicializar Firebase
