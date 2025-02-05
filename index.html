@@ -113,7 +113,7 @@
                         <!-- Información de Salida -->
                         <div>
                             <h4 class="font-bold mb-2">Vuelo de Salida</h4>
-                            <input type="text" id="flightNumber" placeholder="Número de Vuelo" class="w-full p-2 border rounded mb-2">
+                            <input type="text" id="departureflightNumber" placeholder="Número de Vuelo" class="w-full p-2 border rounded mb-2">
                             <input type="text" id="destination" placeholder="Destino" class="w-full p-2 border rounded mb-2">
                             <input type="datetime-local" id="departureTime" class="w-full p-2 border rounded mb-2">
                             <input type="number" id="businessPassengers" placeholder="Pasajeros Business" class="w-full p-2 border rounded mb-2">
@@ -234,7 +234,7 @@
                 <td class="px-6 py-4">${flight.arrivalFlight.specialServices}</td>
                 <td class="px-6 py-4">${flight.arrivalFlight.connectingPassengers}</td>
                 <td class="px-6 py-4">${flight.departureFlight.crewChange ? 'Sí' : 'No'}</td>
-                <td class="px-6 py-4">${flight.departureFlight.flightNumber}</td>
+                <td class="px-6 py-4">${flight.departureFlight.departureflightNumber}</td>
                 <td class="px-6 py-4">${flight.departureFlight.destination}</td>
                 <td class="px-6 py-4">${new Date(flight.departureFlight.departureTime).toLocaleString()}</td>
                 <td class="px-6 py-4">${flight.departureFlight.specialServices}</td>
@@ -284,7 +284,8 @@
                 document.getElementById('platform').value = flightData.arrivalFlight.platformPosition;
                 document.getElementById('specialServices').value = flightData.arrivalFlight.specialServices;
                 document.getElementById('connectingPassengers').value = flightData.arrivalFlight.connectingPassengers;
-
+               
+                document.getElementById('departureflightNumber').value = flightData.departureFlight.departureflightNumber;
                 document.getElementById('destination').value = flightData.departureFlight.destination;
                 document.getElementById('departureTime').value = new Date(flightData.departureFlight.departureTime).toISOString().slice(0, 16);
                 document.getElementById('businessPassengers').value = flightData.departureFlight.businessPassengers;
@@ -355,6 +356,7 @@
                     connectingPassengers: parseInt(document.getElementById('connectingPassengers').value) || 0
                 },
                 departureFlight: {
+                    flightNumber: document.getElementById('departureflightNumber').value,
                     destination: document.getElementById('destination').value,
                     departureTime: new Date(document.getElementById('departureTime').value).toISOString(),
                     businessPassengers: parseInt(document.getElementById('businessPassengers').value) || 0,
